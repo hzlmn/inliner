@@ -9,11 +9,29 @@ import (
   "io/ioutil"
 )
 
-type traverser func (*html.Node) *html.Node
+func Walk(node html.Node, cb func(html.Node)) {
+  cb(node)
+  for c := node.FirstChild; c != nil; c = c.NextSibling {
+    Walk(*c, cb)
+  }
+}
 
-func walk(node *html.Node, cb traverser) {
-  // pass
-  return
+func fetch(file string) ([]byte, error) {
+  // loading filesting
+  return make([]byte, 10), nil
+}
+
+func Traverse(node html.Node) {
+  if node.Type == html.ElementNode && len(node.Attr) >= 1 {
+    for _, atr := range node.Attr {
+      //fmt.Println(atr)
+      if atr.Key == "href" {
+        content, _ := fetch(atr.Val)
+        fmt.Println("content", string(content))
+        fmt.Println("node has href", node.Data)
+      }
+    }
+  }
 }
 
 func main() {
@@ -33,5 +51,5 @@ func main() {
     log.Fatal(err)
   }
 
-  fmt.Println(tree.FirstChild.FirstChild.NextSibling.FirstChild.Attr[0].Val)
+  Walk(*tree, Traverse)
 }
