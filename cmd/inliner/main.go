@@ -4,52 +4,82 @@ import (
   "log"
   "fmt"
   "os"
-  "bytes"
+  "bytes",
+  "bufio"
   "golang.org/x/net/html"
   "io/ioutil"
 )
 
-func Walk(node html.Node, cb func(html.Node)) {
-  cb(node)
-  for c := node.FirstChild; c != nil; c = c.NextSibling {
-    Walk(*c, cb)
+
+// error handling helper
+func handleError(err error) {
+  if err != nil {
+    log.Fatal(err)
+  }  
+}
+
+// file reading helper
+func read(file string) (data []byte) {
+  data, err := ioutil.ReadFile(file)
+  handleError(err)
+  return
+}
+
+func patch(old *html.Node, data []byte) {
+  textNode := &html.Node{
+    Type: html.TextNode,
+    Data: string(data),
   }
-}
 
-func fetch(file string) ([]byte, error) {
-  // loading filesting
-  return make([]byte, 10), nil
-}
-
-func Traverse(node html.Node) {
-  if node.Type == html.ElementNode && len(node.Attr) >= 1 {
-    for _, atr := range node.Attr {
-      //fmt.Println(atr)
-      if atr.Key == "href" {
-        content, _ := fetch(atr.Val)
-        fmt.Println("content", string(content))
-        fmt.Println("node has href", node.Data)
-      }
-    }
+  styleNode := &html.Node{
+    Type: html.ElementNode,
+    Data: "style",
+    FirstChild: textNode,
   }
+
+  old = styleNode
 }
 
+// Main entry point
 func main() {
   var file string
+
   if len(os.Args) > 1 {
     file = os.Args[1]
   }
 
-  data, err := ioutil.ReadFile(file)
-  if err != nil {
-    log.Fatal(err)
-  }
+  data := read(file)
 
   tree, err := html.Parse(bytes.NewReader(data))
 
-  if err != nil {
-    log.Fatal(err)
+  handleError(err)
+
+  traverser := &Traverser{
+    visitors: VMap{
+      html.TextNode: func (node *html.Node, parent *html.Node) {
+        // pass
+      },
+
+      html.ElementNode: func (node *html.Node, parent *html.Node) {
+        if node.Data != "link" {
+          return
+        }
+
+        if node.Attr != nil {
+          for _, attr := range node.Attr {
+            if attr.Key == "href" {
+              //ctx := read(attr.Val)
+              patch(node,read(attr.Val))
+              fmt.Println(string(read(attr.Val)))
+              return
+            }
+          }
+        } 
+      },
+    },
   }
 
-  Walk(*tree, Traverse)
+  traverser.traverse(tree)
+
+  
 }
