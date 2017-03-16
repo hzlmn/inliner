@@ -4,8 +4,8 @@ import (
   "log"
   "fmt"
   "os"
-  "bytes",
   "bufio"
+  "bytes"
   "golang.org/x/net/html"
   "io/ioutil"
 )
@@ -25,7 +25,8 @@ func read(file string) (data []byte) {
   return
 }
 
-func patch(old *html.Node, data []byte) {
+func patch(data []byte) *html.Node {
+
   textNode := &html.Node{
     Type: html.TextNode,
     Data: string(data),
@@ -37,7 +38,7 @@ func patch(old *html.Node, data []byte) {
     FirstChild: textNode,
   }
 
-  old = styleNode
+  return styleNode
 }
 
 // Main entry point
@@ -69,8 +70,10 @@ func main() {
           for _, attr := range node.Attr {
             if attr.Key == "href" {
               //ctx := read(attr.Val)
-              patch(node,read(attr.Val))
-              fmt.Println(string(read(attr.Val)))
+              ctx := patch(read(attr.Val))
+              parent.RemoveChild(node)
+              //fmt.Println("new node", ctx.FirstChild)
+              parent.AppendChild(ctx)
               return
             }
           }
@@ -81,5 +84,13 @@ func main() {
 
   traverser.traverse(tree)
 
+  //fmt.Println("Child", tree.FirstChild.NextSibling.FirstChild.FirstChild.Type)
+  var b bytes.Buffer
+  w := bufio.NewWriter(&b)
+  html.Render(w, tree)
+
+  w.Flush()
+
+  fmt.Println(b.String())
   
 }
