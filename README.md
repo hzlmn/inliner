@@ -1,5 +1,5 @@
 # inliner
-go tool for inlining external css into html
+go tool for inlining external styles and scripts into single `html` file
 
 ```go
 
