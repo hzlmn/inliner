@@ -20,5 +20,4 @@ func TestTextNode(t *testing.T) {
 func TestStyleNode(t *testing.T) {
 	str := "some data"
 	node := StyleNode([]byte(str))
-	t.Log(node)
 }

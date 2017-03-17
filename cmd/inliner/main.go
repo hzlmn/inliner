@@ -1,16 +1,18 @@
 package main
 
 import (
-  "fmt"
+	"fmt"
   "flag"
+	"log"
   "bytes"
   "bufio"
+	"path/filepath"
   "golang.org/x/net/html"
 )
 
 var (
 	input = flag.String("i", "", "define entry point to file that should be inlined")
-	output = flag.String("o", "bundle.html", "output file path")
+	output = flag.String("o", "out.html", "output file path")
 )
 
 
@@ -18,7 +20,9 @@ var (
 func main() {
 	flag.Parse()
 
-  fmt.Println(*input, *output)
+	if len(*input) < 1 {
+		log.Fatal("-i input flag should be defined")
+	}
 
   data := read(*input)
 
@@ -43,5 +47,10 @@ func main() {
   w.Flush()
 
 	// Shold be replaced with flag
-  write("./out.html", b.Bytes())
+  write(*output, b.Bytes())
+
+	abspath, err := filepath.Abs(*output)
+	handleError(err)
+
+	fmt.Printf("File was written at: %s \n", abspath)
 }

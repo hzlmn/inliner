@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"golang.org/x/net/html"
 )
 
@@ -13,7 +12,7 @@ func textNodeVisitor(node *html.Node, parent *html.Node) {
 }
 
 func elementNodeVisitor(node *html.Node, parent *html.Node) {
-	//var href string
+	var href string
 
 	if node.Data != "link" {
 		return
@@ -21,21 +20,25 @@ func elementNodeVisitor(node *html.Node, parent *html.Node) {
 
 	for _, attr := range node.Attr {
 		if attr.Key == "href" {
-			//href = attr.Val
+			href = attr.Val
 			break
 		}
 	}
 
-	//patch := StyleNode(read(href))
+	*node, cached = StyleNode(read(href)), *node
+	node.NextSibling = cached.NextSibling
+	node.Parent = cached.Parent
+	node.PrevSibling = cached.PrevSibling
 
-	for c := node.NextSibling; c != nil; c = c.NextSibling {
-		fmt.Println("next", c)
-	}
+	// Maybe wrap with new lines
 
-	// fmt.Println(node.PrevSibling.Data)
-	// *node, cached = StyleNode(read(href)), *node
-	// node.NextSibling = cached.NextSibling
-	// node.NextSibling.PrevSibling = node
-	// node.Parent = cached.Parent
-	// node.PrevSibling = cached.PrevSibling
+	// raw := TextNode([]byte{10,32,32})
+	// fmt.Println(raw)
+
+	// for c := node.NextSibling; c != nil; c = c.NextSibling {
+	// 	if c.Type == html.TextNode {
+	// 		fmt.Println("test", []byte(c.Data))
+	// 	}
+	// }
+
 }
