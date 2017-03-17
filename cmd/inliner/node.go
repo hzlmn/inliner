@@ -11,8 +11,8 @@ func TextNode(data []byte) *html.Node {
 	}
 }
 
-func StyleNode(data []byte) *html.Node {
-	return &html.Node{
+func StyleNode(data []byte) html.Node {
+	return html.Node{
     Type: html.ElementNode,
     Data: "style",
     FirstChild: TextNode(data),

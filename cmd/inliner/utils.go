@@ -18,3 +18,9 @@ func read(file string) (data []byte) {
   handleError(err)
   return
 }
+
+// write helper
+func write(file string, data []byte) {
+	err := ioutil.WriteFile(file, data, 0666)
+	handleError(err)
+}

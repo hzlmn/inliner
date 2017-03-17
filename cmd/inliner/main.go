@@ -37,9 +37,11 @@ func main() {
 
   var b bytes.Buffer
   w := bufio.NewWriter(&b)
+
   html.Render(w, tree)
 
   w.Flush()
 
-  fmt.Println(b.String())
+	// Shold be replaced with flag
+  write("./out.html", b.Bytes())
 }
